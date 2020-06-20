@@ -7,9 +7,9 @@
  */
 
 import React, { Component } from 'react';
-import { View, Text, Button, Modal, ViewPagerAndroid, Slider ,Animated,StyleSheet,Image, ImageBackground,Easing,FlatList} from 'react-native';
+import { View, Text, Button, Modal, ViewPagerAndroid, Slider ,Animated,StyleSheet,Image, ImageBackground,Easing,FlatList,TouchableOpacity} from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer, DrawerActions } from '@react-navigation/native';
+import { NavigationContainer, DrawerActions,StackNavigator } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import ViewPager from '@react-native-community/viewpager';
@@ -18,6 +18,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { withSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 
 
@@ -147,11 +148,11 @@ class Home extends React.Component{
 
 class List extends React.Component{
   render(){
-     return(
-      
-      <Flat></Flat>
+     return<Stack.Navigator>
+     <Stack.Screen name="Flat" component={Flat}/> 
+     <Stack.Screen name="ListDetails" component={ListDetail}/> 
 
-     )  
+     </Stack.Navigator> 
    
   }
 }
@@ -309,12 +310,18 @@ class MusicPage extends React.Component{
 
 class Flat extends Component {
 
+
+
+  
+  
   constructor(props){
       super(props)
       this.url="http://123.56.28.23:8080/singe/findAll"
       this.max=4
       this.state={data:[],albums:[]}
+     
   }
+  
 
   componentDidMount(){
       fetch(this.url,{method:"GET"})
@@ -340,14 +347,22 @@ class Flat extends Component {
      
   }
 
+  
   _renderItem=({item})=>{
       return (
+        <TouchableOpacity
+        onPress={()=>this.showDetails(item.id,item.name,item.singer,item.img)}
+      >
           <View style={{height:155,justifyContent:"space-between",flexWrap:"wrap",flexDirection:'row',alignItems:"center",marginTop:5}} >
               <View><Image style={{width:150,height:150}} source={{uri:item.img}}/></View>
-              <View style={{height:10}}><Text>{item.name}</Text></View>
-              <View><Button style={{width:50,height:50,textAlign:"center",textAlignVertical:'center'}} onPress={()=>this._del(item.id)} title="删除"/></View>
+              <View style={{height:10}}><Text style={{fontSize:20}}>{item.name}</Text></View>
+              <View  ><Button style={{width:100,height:100,textAlign:"center",textAlignVertical:'center'}} onPress={()=>this._del(item.id)} title="删除"/>
+              </View>
+              
               
           </View>
+          </TouchableOpacity>
+          
       )
   }
   _ItemSeparatorComponent=()=>{
@@ -365,12 +380,21 @@ class Flat extends Component {
       data.push(++this.max)
       this.setState({data:data})
   }
+  showDetails =(id,name,singer,img)=>{
+    let params = {list_id:id,list_name:name,list_singer:singer,list_img:img}
+    this.props.navigation.navigate("ListDetails",params)
+ 
+  }
   
-
+ 
 
   render() {
+
+    
       return (
-          <View>
+          
+        
+       <View>
               <FlatList
                   ListEmptyComponent={<Text>数据是空的</Text>}
                   keyExtractor={({item,index})=>index}
@@ -380,9 +404,47 @@ class Flat extends Component {
                   
               />
           </View>
+
+     
+          
+          
+            
+          
+
+          
+          
       )
   }
 }
+
+class ListDetail extends React.Component {
+  constructor(props) {
+    super(props);
+    
+
+    this.state = {
+        
+    };
+  }
+
+  
+
+  
+  render() {
+    
+    return (
+        <View>
+          <View style={{alignItems:'center',marginTop:30}}><Image style={{width:200,height:200}} source={{uri:this.props.route.params.list_img}}/></View>
+          <View><Text style={{fontSize:30,textAlign:'center',marginTop:30}}>歌名：{this.props.route.params.list_name}</Text></View>
+          <View><Text style={{fontSize:30,textAlign:'center',marginTop:30}}>歌手：{this.props.route.params.list_singer}</Text></View>
+            
+        </View>
+    );
+  }
+}
+
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -392,4 +454,5 @@ const styles = StyleSheet.create({
       marginTop: 100,
   }
 });
+
 
